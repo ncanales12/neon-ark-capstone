@@ -29,4 +29,9 @@ public class CreatureController {
     public Creature createCreature(@RequestBody Creature creature) {
         return creatureRepository.save(creature);
     }
+
+    @DeleteMapping("/creatures/{id}")
+    public void deleteCreature(@PathVariable Long id) {
+        creatureRepository.deleteById(id);
+    }
 }
