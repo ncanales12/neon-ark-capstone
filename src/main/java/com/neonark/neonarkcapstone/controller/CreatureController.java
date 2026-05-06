@@ -2,8 +2,7 @@ package com.neonark.neonarkcapstone.controller;
 
 import com.neonark.neonarkcapstone.entity.Creature;
 import com.neonark.neonarkcapstone.repository.CreatureRepository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,5 +18,10 @@ public class CreatureController {
     @GetMapping("/creatures")
     public List<Creature> getCreatures() {
         return creatureRepository.findAll();
+    }
+
+    @PostMapping("/creatures")
+    public Creature createCreature(@RequestBody Creature creature) {
+        return creatureRepository.save(creature);
     }
 }
