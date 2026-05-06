@@ -20,6 +20,11 @@ public class CreatureController {
         return creatureRepository.findAll();
     }
 
+    @GetMapping("/creatures/{id}")
+    public Creature getCreatureById(@PathVariable Long id) {
+        return creatureRepository.findById(id).orElse(null);
+    }
+
     @PostMapping("/creatures")
     public Creature createCreature(@RequestBody Creature creature) {
         return creatureRepository.save(creature);
