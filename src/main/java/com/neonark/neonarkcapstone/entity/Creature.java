@@ -12,14 +12,17 @@ public class Creature {
 
     private String name;
 
-    // basic constructor
+    @ManyToOne
+    @JoinColumn(name = "habitat_id")
+    private Habitat habitat;
+
     public Creature() {}
 
-    public Creature(String name) {
+    public Creature(String name, Habitat habitat) {
         this.name = name;
+        this.habitat = habitat;
     }
 
-    // getters and setters
     public Long getId() {
         return id;
     }
@@ -28,7 +31,15 @@ public class Creature {
         return name;
     }
 
+    public Habitat getHabitat() {
+        return habitat;
+    }
+
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setHabitat(Habitat habitat) {
+        this.habitat = habitat;
     }
 }
