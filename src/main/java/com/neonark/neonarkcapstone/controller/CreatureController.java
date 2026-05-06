@@ -1,5 +1,6 @@
 package com.neonark.neonarkcapstone.controller;
 
+import com.neonark.neonarkcapstone.dto.CreatureResponse;
 import com.neonark.neonarkcapstone.entity.Creature;
 import com.neonark.neonarkcapstone.repository.CreatureRepository;
 import org.springframework.web.bind.annotation.*;
@@ -17,13 +18,22 @@ public class CreatureController {
     }
 
     @GetMapping
-    public List<Creature> getCreatures() {
-        return creatureRepository.findAll();
+    public List<CreatureResponse> getCreatures() {
+        return creatureRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public Creature getCreatureById(@PathVariable Long id) {
-        return creatureRepository.findById(id).orElse(null);
+    public CreatureResponse getCreatureById(@PathVariable Long id) {
+        Creature creature = creatureRepository.findById(id).orElse(null);
+
+        if (creature == null) {
+            return null;
+        }
+
+        return toResponse(creature);
     }
 
     @PostMapping
@@ -39,7 +49,6 @@ public class CreatureController {
             return null;
         }
 
-        // updates only the name because the capstone has a separate rename route
         existing.setName(updatedCreature.getName());
 
         return creatureRepository.save(existing);
@@ -48,5 +57,19 @@ public class CreatureController {
     @DeleteMapping("/{id}")
     public void deleteCreature(@PathVariable Long id) {
         creatureRepository.deleteById(id);
+    }
+
+    private CreatureResponse toResponse(Creature creature) {
+        String habitatName = null;
+
+        if (creature.getHabitat() != null) {
+            habitatName = creature.getHabitat().getName();
+        }
+
+        return new CreatureResponse(
+                creature.getId(),
+                creature.getName(),
+                habitatName
+        );
     }
 }
