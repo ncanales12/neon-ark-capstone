@@ -34,4 +34,19 @@ public class CreatureController {
     public void deleteCreature(@PathVariable Long id) {
         creatureRepository.deleteById(id);
     }
+
+    @PutMapping("/creatures/{id}")
+    public Creature updateCreature(@PathVariable Long id, @RequestBody Creature updatedCreature) {
+
+        Creature existing = creatureRepository.findById(id).orElse(null);
+
+        if (existing == null) {
+            return null;
+        }
+
+        // update fields
+        existing.setName(updatedCreature.getName());
+
+        return creatureRepository.save(existing);
+    }
 }
