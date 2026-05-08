@@ -7,6 +7,7 @@ import com.neonark.neonarkcapstone.repository.CreatureRepository;
 import com.neonark.neonarkcapstone.repository.ObservationRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -43,6 +44,20 @@ public class CreatureController {
     @GetMapping("/{id}/observations")
     public List<Observation> getCreatureObservations(@PathVariable Long id) {
         return observationRepository.findByCreatureId(id);
+    }
+
+    @PostMapping("/{id}/observations")
+    public Observation createCreatureObservation(@PathVariable Long id, @RequestBody Observation observation) {
+        Creature creature = creatureRepository.findById(id).orElse(null);
+
+        if (creature == null) {
+            return null;
+        }
+
+        observation.setCreature(creature);
+        observation.setCreatedAt(LocalDateTime.now());
+
+        return observationRepository.save(observation);
     }
 
     @PostMapping
