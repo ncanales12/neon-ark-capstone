@@ -2,7 +2,9 @@ package com.neonark.neonarkcapstone.controller;
 
 import com.neonark.neonarkcapstone.dto.CreatureResponse;
 import com.neonark.neonarkcapstone.entity.Creature;
+import com.neonark.neonarkcapstone.entity.Observation;
 import com.neonark.neonarkcapstone.repository.CreatureRepository;
+import com.neonark.neonarkcapstone.repository.ObservationRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,9 +14,11 @@ import java.util.List;
 public class CreatureController {
 
     private final CreatureRepository creatureRepository;
+    private final ObservationRepository observationRepository;
 
-    public CreatureController(CreatureRepository creatureRepository) {
+    public CreatureController(CreatureRepository creatureRepository, ObservationRepository observationRepository) {
         this.creatureRepository = creatureRepository;
+        this.observationRepository = observationRepository;
     }
 
     @GetMapping
@@ -34,6 +38,11 @@ public class CreatureController {
         }
 
         return toResponse(creature);
+    }
+
+    @GetMapping("/{id}/observations")
+    public List<Observation> getCreatureObservations(@PathVariable Long id) {
+        return observationRepository.findByCreatureId(id);
     }
 
     @PostMapping
