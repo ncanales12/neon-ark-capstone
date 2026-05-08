@@ -1,6 +1,7 @@
 package com.neonark.neonarkcapstone.controller;
 
 import com.neonark.neonarkcapstone.dto.CreatureResponse;
+import com.neonark.neonarkcapstone.dto.ObservationResponse;
 import com.neonark.neonarkcapstone.entity.Creature;
 import com.neonark.neonarkcapstone.entity.FeedingSchedule;
 import com.neonark.neonarkcapstone.entity.Observation;
@@ -33,7 +34,7 @@ public class CreatureController {
     public List<CreatureResponse> getCreatures() {
         return creatureRepository.findAll()
                 .stream()
-                .map(this::toResponse)
+                .map(this::toCreatureResponse)
                 .toList();
     }
 
@@ -45,21 +46,26 @@ public class CreatureController {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(toResponse(creature));
+        return ResponseEntity.ok(toCreatureResponse(creature));
     }
 
     @GetMapping("/{id}/observations")
-    public ResponseEntity<List<Observation>> getCreatureObservations(@PathVariable Long id) {
+    public ResponseEntity<List<ObservationResponse>> getCreatureObservations(@PathVariable Long id) {
         if (!creatureRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(observationRepository.findByCreatureId(id));
+        List<ObservationResponse> responses = observationRepository.findByCreatureId(id)
+                .stream()
+                .map(this::toObservationResponse)
+                .toList();
+
+        return ResponseEntity.ok(responses);
     }
 
     @PostMapping("/{id}/observations")
-    public ResponseEntity<Observation> createCreatureObservation(@PathVariable Long id,
-                                                                 @RequestBody Observation observation) {
+    public ResponseEntity<ObservationResponse> createCreatureObservation(@PathVariable Long id,
+                                                                         @RequestBody Observation observation) {
 
         Creature creature = creatureRepository.findById(id).orElse(null);
 
@@ -74,7 +80,9 @@ public class CreatureController {
         observation.setCreature(creature);
         observation.setCreatedAt(LocalDateTime.now());
 
-        return ResponseEntity.status(201).body(observationRepository.save(observation));
+        Observation saved = observationRepository.save(observation);
+
+        return ResponseEntity.status(201).body(toObservationResponse(saved));
     }
 
     @PostMapping("/{id}/feedings")
@@ -147,7 +155,7 @@ public class CreatureController {
         return ResponseEntity.noContent().build();
     }
 
-    private CreatureResponse toResponse(Creature creature) {
+    private CreatureResponse toCreatureResponse(Creature creature) {
         String habitatName = null;
 
         if (creature.getHabitat() != null) {
@@ -158,6 +166,22 @@ public class CreatureController {
                 creature.getId(),
                 creature.getName(),
                 habitatName
+        );
+    }
+
+    private ObservationResponse toObservationResponse(Observation observation) {
+        Long creatureId = null;
+
+        if (observation.getCreature() != null) {
+            creatureId = observation.getCreature().getId();
+        }
+
+        return new ObservationResponse(
+                observation.getId(),
+                observation.getNote(),
+                observation.getAuthorName(),
+                creatureId,
+                observation.getCreatedAt()
         );
     }
 }
