@@ -2,8 +2,10 @@ package com.neonark.neonarkcapstone.controller;
 
 import com.neonark.neonarkcapstone.dto.CreatureResponse;
 import com.neonark.neonarkcapstone.entity.Creature;
+import com.neonark.neonarkcapstone.entity.FeedingSchedule;
 import com.neonark.neonarkcapstone.entity.Observation;
 import com.neonark.neonarkcapstone.repository.CreatureRepository;
+import com.neonark.neonarkcapstone.repository.FeedingScheduleRepository;
 import com.neonark.neonarkcapstone.repository.ObservationRepository;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,10 +18,14 @@ public class CreatureController {
 
     private final CreatureRepository creatureRepository;
     private final ObservationRepository observationRepository;
+    private final FeedingScheduleRepository feedingScheduleRepository;
 
-    public CreatureController(CreatureRepository creatureRepository, ObservationRepository observationRepository) {
+    public CreatureController(CreatureRepository creatureRepository,
+                              ObservationRepository observationRepository,
+                              FeedingScheduleRepository feedingScheduleRepository) {
         this.creatureRepository = creatureRepository;
         this.observationRepository = observationRepository;
+        this.feedingScheduleRepository = feedingScheduleRepository;
     }
 
     @GetMapping
@@ -58,6 +64,19 @@ public class CreatureController {
         observation.setCreatedAt(LocalDateTime.now());
 
         return observationRepository.save(observation);
+    }
+
+    @PostMapping("/{id}/feedings")
+    public FeedingSchedule createCreatureFeeding(@PathVariable Long id, @RequestBody FeedingSchedule feedingSchedule) {
+        Creature creature = creatureRepository.findById(id).orElse(null);
+
+        if (creature == null) {
+            return null;
+        }
+
+        feedingSchedule.setCreature(creature);
+
+        return feedingScheduleRepository.save(feedingSchedule);
     }
 
     @PostMapping
