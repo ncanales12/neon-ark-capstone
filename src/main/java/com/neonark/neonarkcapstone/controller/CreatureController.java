@@ -103,6 +103,10 @@ public class CreatureController {
             return ResponseEntity.badRequest().build();
         }
 
+        if (creatureRepository.existsByNameIgnoreCase(creature.getName())) {
+            return ResponseEntity.status(409).build();
+        }
+
         Creature saved = creatureRepository.save(creature);
 
         return ResponseEntity.status(201).body(saved);
@@ -120,6 +124,10 @@ public class CreatureController {
 
         if (updatedCreature.getName() == null || updatedCreature.getName().isBlank()) {
             return ResponseEntity.badRequest().build();
+        }
+
+        if (creatureRepository.existsByNameIgnoreCase(updatedCreature.getName())) {
+            return ResponseEntity.status(409).build();
         }
 
         existing.setName(updatedCreature.getName());
