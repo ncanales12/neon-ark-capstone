@@ -35,7 +35,7 @@ public class Main {
                     break;
 
                 case "4":
-                    System.out.println("Rename creature coming soon.");
+                    renameCreature(scanner);
                     break;
 
                 case "5":
@@ -112,6 +112,30 @@ public class Main {
         sendPostRequest("http://localhost:8080/api/creatures", jsonBody, "=== Creature Registered ===");
     }
 
+    private static void renameCreature(Scanner scanner) {
+        System.out.print("Enter creature ID to rename: ");
+        String id = scanner.nextLine();
+
+        System.out.print("Enter new creature name: ");
+        String newName = scanner.nextLine();
+
+        System.out.print("Are you sure you want to rename this creature? (Y/N): ");
+        String confirm = scanner.nextLine();
+
+        if (!confirm.equalsIgnoreCase("Y")) {
+            System.out.println("Rename cancelled.");
+            return;
+        }
+
+        String jsonBody = "{\"name\":\"" + newName + "\"}";
+
+        sendPutRequest(
+                "http://localhost:8080/api/creatures/" + id + "/name",
+                jsonBody,
+                "=== Creature Renamed ==="
+        );
+    }
+
     private static void sendGetRequest(String urlText, String heading) {
 
         try {
@@ -170,6 +194,63 @@ public class Main {
 
             if (statusCode == 400) {
                 System.out.println("Bad request. Check your input.");
+                connection.disconnect();
+                return;
+            }
+
+            if (statusCode == 409) {
+                System.out.println("Conflict. That creature name already exists.");
+                connection.disconnect();
+                return;
+            }
+
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(connection.getInputStream())
+            );
+
+            String line;
+
+            System.out.println();
+            System.out.println(heading);
+
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+
+            reader.close();
+            connection.disconnect();
+
+        } catch (Exception e) {
+            System.out.println("Error connecting to API.");
+        }
+    }
+
+    private static void sendPutRequest(String urlText, String jsonBody, String heading) {
+
+        try {
+
+            URL url = new URL(urlText);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            connection.setRequestMethod("PUT");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+
+            OutputStream outputStream = connection.getOutputStream();
+            outputStream.write(jsonBody.getBytes());
+            outputStream.flush();
+            outputStream.close();
+
+            int statusCode = connection.getResponseCode();
+
+            if (statusCode == 400) {
+                System.out.println("Bad request. Check your input.");
+                connection.disconnect();
+                return;
+            }
+
+            if (statusCode == 404) {
+                System.out.println("Not found.");
                 connection.disconnect();
                 return;
             }
