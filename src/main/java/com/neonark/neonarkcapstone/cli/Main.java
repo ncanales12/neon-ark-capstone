@@ -51,7 +51,7 @@ public class Main {
                     break;
 
                 case "8":
-                    System.out.println("View all system users coming soon.");
+                    viewAllSystemUsers();
                     break;
 
                 case "0":
@@ -169,6 +169,10 @@ public class Main {
                 "http://localhost:8080/api/feedings?time=" + time,
                 "=== Feedings At " + time + " ==="
         );
+    }
+
+    private static void viewAllSystemUsers() {
+        sendGetRequest("http://localhost:8080/api/admin/users", "=== System Users ===");
     }
 
     private static void sendGetRequest(String urlText, String heading) {
