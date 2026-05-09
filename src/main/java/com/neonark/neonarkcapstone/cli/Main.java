@@ -43,7 +43,7 @@ public class Main {
                     break;
 
                 case "6":
-                    System.out.println("View creature observations/notes coming soon.");
+                    viewCreatureObservations(scanner);
                     break;
 
                 case "7":
@@ -149,6 +149,16 @@ public class Main {
         }
 
         sendDeleteRequest("http://localhost:8080/api/creatures/" + id);
+    }
+
+    private static void viewCreatureObservations(Scanner scanner) {
+        System.out.print("Enter creature ID: ");
+        String id = scanner.nextLine();
+
+        sendGetRequest(
+                "http://localhost:8080/api/creatures/" + id + "/observations",
+                "=== Creature Observations ==="
+        );
     }
 
     private static void sendGetRequest(String urlText, String heading) {
