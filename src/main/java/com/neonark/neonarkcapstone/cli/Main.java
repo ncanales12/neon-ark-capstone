@@ -47,7 +47,7 @@ public class Main {
                     break;
 
                 case "7":
-                    System.out.println("Find creatures by feeding time coming soon.");
+                    findCreaturesByFeedingTime(scanner);
                     break;
 
                 case "8":
@@ -158,6 +158,16 @@ public class Main {
         sendGetRequest(
                 "http://localhost:8080/api/creatures/" + id + "/observations",
                 "=== Creature Observations ==="
+        );
+    }
+
+    private static void findCreaturesByFeedingTime(Scanner scanner) {
+        System.out.print("Enter feeding time (HH:MM): ");
+        String time = scanner.nextLine();
+
+        sendGetRequest(
+                "http://localhost:8080/api/feedings?time=" + time,
+                "=== Feedings At " + time + " ==="
         );
     }
 
