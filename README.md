@@ -1,3 +1,133 @@
+\# Neon Ark Capstone Project
+
+
+
+Neon Ark is a creature intake tracking system built using Java, Spring Boot, PostgreSQL, Docker, and Gradle. The project allows users to manage creatures, habitats, feeding schedules, observations, and admin system data through both a REST API and a command line interface (CLI).
+
+
+
+This project was created for the COSC 4301 Modern Programming capstone course.
+
+
+
+\---
+
+
+
+\# Features
+
+
+
+\## Creature Management
+
+\- View all creatures
+
+\- View creature details by ID
+
+\- Register new creatures
+
+\- Rename creatures
+
+\- Remove creatures
+
+
+
+\## Observation System
+
+\- View creature observations and notes
+
+\- Track observation author and timestamps
+
+
+
+\## Feeding Schedule System
+
+\- Find creatures by feeding time
+
+\- View feeding schedule information
+
+
+
+\## Admin Features
+
+\- View system users
+
+
+
+\## Technical Features
+
+\- REST API built with Spring Boot
+
+\- PostgreSQL database integration
+
+\- Docker container setup
+
+\- Java CLI application
+
+\- DTO response objects
+
+\- Validation and HTTP status codes
+
+\- CRUD operations
+
+
+
+\---
+
+
+
+\# Technologies Used
+
+
+
+\- Java
+
+\- Spring Boot
+
+\- PostgreSQL
+
+\- Docker
+
+\- Gradle
+
+\- IntelliJ IDEA
+
+
+
+\---
+
+
+
+\# Project Structure
+
+
+
+```text
+
+src/main/java/com/neonark/neonarkcapstone
+
+│
+
+├── controller
+
+├── entity
+
+├── repository
+
+├── dto
+
+├── cli
+
+└── config
+
+```
+
+
+
+\---
+
+
+
 \# Database Setup
 
 
@@ -13,6 +143,18 @@ Start the database container:
 ```bash
 
 docker start neon\_ark\_postgres
+
+```
+
+
+
+Verify the container is running:
+
+
+
+```bash
+
+docker ps
 
 ```
 
@@ -89,6 +231,42 @@ GET /api/creatures
 ```http
 
 GET /api/creatures/3
+
+```
+
+
+
+\## Create creature
+
+
+
+```http
+
+POST /api/creatures
+
+```
+
+
+
+\## Rename creature
+
+
+
+```http
+
+PUT /api/creatures/{id}/name
+
+```
+
+
+
+\## Delete creature
+
+
+
+```http
+
+DELETE /api/creatures/{id}
 
 ```
 
@@ -287,4 +465,16 @@ Returns:
 409 Conflict
 
 ```
+
+
+
+\---
+
+
+
+\# Author
+
+
+
+Nicolas Canales
 
