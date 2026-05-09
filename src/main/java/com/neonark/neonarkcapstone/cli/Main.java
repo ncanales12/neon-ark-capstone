@@ -2,6 +2,7 @@ package com.neonark.neonarkcapstone.cli;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
@@ -30,7 +31,7 @@ public class Main {
                     break;
 
                 case "3":
-                    System.out.println("Register new creature coming soon.");
+                    registerNewCreature(scanner);
                     break;
 
                 case "4":
@@ -102,6 +103,15 @@ public class Main {
         sendGetRequest("http://localhost:8080/api/creatures/" + id, "=== Creature Details ===");
     }
 
+    private static void registerNewCreature(Scanner scanner) {
+        System.out.print("Enter creature name: ");
+        String name = scanner.nextLine();
+
+        String jsonBody = "{\"name\":\"" + name + "\"}";
+
+        sendPostRequest("http://localhost:8080/api/creatures", jsonBody, "=== Creature Registered ===");
+    }
+
     private static void sendGetRequest(String urlText, String heading) {
 
         try {
@@ -115,6 +125,57 @@ public class Main {
 
             if (statusCode == 404) {
                 System.out.println("Not found.");
+                connection.disconnect();
+                return;
+            }
+
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(connection.getInputStream())
+            );
+
+            String line;
+
+            System.out.println();
+            System.out.println(heading);
+
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+
+            reader.close();
+            connection.disconnect();
+
+        } catch (Exception e) {
+            System.out.println("Error connecting to API.");
+        }
+    }
+
+    private static void sendPostRequest(String urlText, String jsonBody, String heading) {
+
+        try {
+
+            URL url = new URL(urlText);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+
+            OutputStream outputStream = connection.getOutputStream();
+            outputStream.write(jsonBody.getBytes());
+            outputStream.flush();
+            outputStream.close();
+
+            int statusCode = connection.getResponseCode();
+
+            if (statusCode == 400) {
+                System.out.println("Bad request. Check your input.");
+                connection.disconnect();
+                return;
+            }
+
+            if (statusCode == 409) {
+                System.out.println("Conflict. That creature name already exists.");
                 connection.disconnect();
                 return;
             }
