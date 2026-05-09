@@ -39,7 +39,7 @@ public class Main {
                     break;
 
                 case "5":
-                    System.out.println("Remove creature coming soon.");
+                    removeCreature(scanner);
                     break;
 
                 case "6":
@@ -134,6 +134,21 @@ public class Main {
                 jsonBody,
                 "=== Creature Renamed ==="
         );
+    }
+
+    private static void removeCreature(Scanner scanner) {
+        System.out.print("Enter creature ID to remove: ");
+        String id = scanner.nextLine();
+
+        System.out.print("Are you sure you want to remove this creature? (Y/N): ");
+        String confirm = scanner.nextLine();
+
+        if (!confirm.equalsIgnoreCase("Y")) {
+            System.out.println("Remove cancelled.");
+            return;
+        }
+
+        sendDeleteRequest("http://localhost:8080/api/creatures/" + id);
     }
 
     private static void sendGetRequest(String urlText, String heading) {
@@ -275,6 +290,36 @@ public class Main {
             }
 
             reader.close();
+            connection.disconnect();
+
+        } catch (Exception e) {
+            System.out.println("Error connecting to API.");
+        }
+    }
+
+    private static void sendDeleteRequest(String urlText) {
+
+        try {
+
+            URL url = new URL(urlText);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            connection.setRequestMethod("DELETE");
+
+            int statusCode = connection.getResponseCode();
+
+            if (statusCode == 404) {
+                System.out.println("Not found.");
+                connection.disconnect();
+                return;
+            }
+
+            if (statusCode == 204) {
+                System.out.println("Creature removed.");
+            } else {
+                System.out.println("Unexpected response: " + statusCode);
+            }
+
             connection.disconnect();
 
         } catch (Exception e) {
