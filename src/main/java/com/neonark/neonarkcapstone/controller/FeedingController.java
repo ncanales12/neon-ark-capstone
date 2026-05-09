@@ -1,5 +1,6 @@
 package com.neonark.neonarkcapstone.controller;
 
+import com.neonark.neonarkcapstone.dto.FeedingScheduleResponse;
 import com.neonark.neonarkcapstone.entity.FeedingSchedule;
 import com.neonark.neonarkcapstone.repository.FeedingScheduleRepository;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +19,30 @@ public class FeedingController {
     }
 
     @GetMapping
-    public List<FeedingSchedule> getFeedingsByTime(@RequestParam String time) {
+    public List<FeedingScheduleResponse> getFeedingsByTime(@RequestParam String time) {
         LocalTime feedingTime = LocalTime.parse(time);
 
-        return feedingScheduleRepository.findByFeedingTime(feedingTime);
+        return feedingScheduleRepository.findByFeedingTime(feedingTime)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    private FeedingScheduleResponse toResponse(FeedingSchedule feedingSchedule) {
+        Long creatureId = null;
+        String creatureName = null;
+
+        if (feedingSchedule.getCreature() != null) {
+            creatureId = feedingSchedule.getCreature().getId();
+            creatureName = feedingSchedule.getCreature().getName();
+        }
+
+        return new FeedingScheduleResponse(
+                feedingSchedule.getId(),
+                feedingSchedule.getFeedingTime(),
+                feedingSchedule.getFoodType(),
+                creatureId,
+                creatureName
+        );
     }
 }
