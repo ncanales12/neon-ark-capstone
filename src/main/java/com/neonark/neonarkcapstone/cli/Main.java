@@ -26,7 +26,7 @@ public class Main {
                     break;
 
                 case "2":
-                    System.out.println("View creature by ID coming next.");
+                    viewCreatureById(scanner);
                     break;
 
                 case "3":
@@ -92,13 +92,32 @@ public class Main {
     }
 
     private static void listAllCreatures() {
+        sendGetRequest("http://localhost:8080/api/creatures", "=== Creatures ===");
+    }
+
+    private static void viewCreatureById(Scanner scanner) {
+        System.out.print("Enter creature ID: ");
+        String id = scanner.nextLine();
+
+        sendGetRequest("http://localhost:8080/api/creatures/" + id, "=== Creature Details ===");
+    }
+
+    private static void sendGetRequest(String urlText, String heading) {
 
         try {
 
-            URL url = new URL("http://localhost:8080/api/creatures");
+            URL url = new URL(urlText);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
             connection.setRequestMethod("GET");
+
+            int statusCode = connection.getResponseCode();
+
+            if (statusCode == 404) {
+                System.out.println("Not found.");
+                connection.disconnect();
+                return;
+            }
 
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(connection.getInputStream())
@@ -107,7 +126,7 @@ public class Main {
             String line;
 
             System.out.println();
-            System.out.println("=== Creatures ===");
+            System.out.println(heading);
 
             while ((line = reader.readLine()) != null) {
                 System.out.println(line);
