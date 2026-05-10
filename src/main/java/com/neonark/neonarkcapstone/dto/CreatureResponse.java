@@ -5,11 +5,13 @@ public class CreatureResponse {
     private Long id;
     private String name;
     private String habitatName;
+    private String status;
 
-    public CreatureResponse(Long id, String name, String habitatName) {
+    public CreatureResponse(Long id, String name, String habitatName, String status) {
         this.id = id;
         this.name = name;
         this.habitatName = habitatName;
+        this.status = status;
     }
 
     public Long getId() {
@@ -22,5 +24,9 @@ public class CreatureResponse {
 
     public String getHabitatName() {
         return habitatName;
+    }
+
+    public String getStatus() {
+        return status;
     }
 }

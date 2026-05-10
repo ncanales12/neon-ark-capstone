@@ -115,6 +115,8 @@ public class CreatureController {
             return ResponseEntity.status(409).build();
         }
 
+        creature.setStatus("ACTIVE");
+
         Creature saved = creatureRepository.save(creature);
 
         return ResponseEntity.status(201).body(saved);
@@ -162,10 +164,17 @@ public class CreatureController {
             habitatName = creature.getHabitat().getName();
         }
 
+        String status = creature.getStatus();
+
+        if (status == null || status.isBlank()) {
+            status = "ACTIVE";
+        }
+
         return new CreatureResponse(
                 creature.getId(),
                 creature.getName(),
-                habitatName
+                habitatName,
+                status
         );
     }
 
