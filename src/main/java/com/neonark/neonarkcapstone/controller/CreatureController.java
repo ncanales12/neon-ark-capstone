@@ -146,15 +146,20 @@ public class CreatureController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCreature(@PathVariable Long id) {
+    public ResponseEntity<CreatureResponse> deleteCreature(@PathVariable Long id) {
 
-        if (!creatureRepository.existsById(id)) {
+        Creature creature = creatureRepository.findById(id).orElse(null);
+
+        if (creature == null) {
             return ResponseEntity.notFound().build();
         }
 
-        creatureRepository.deleteById(id);
+        // Soft delete keeps the record but marks it as removed.
+        creature.setStatus("REMOVED");
 
-        return ResponseEntity.noContent().build();
+        Creature saved = creatureRepository.save(creature);
+
+        return ResponseEntity.ok(toCreatureResponse(saved));
     }
 
     private CreatureResponse toCreatureResponse(Creature creature) {
