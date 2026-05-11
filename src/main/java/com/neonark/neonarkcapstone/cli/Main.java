@@ -97,14 +97,26 @@ public class Main {
     }
 
     private static void listAllCreatures() {
-        sendGetRequest("http://localhost:8080/api/creatures", "=== Creatures ===");
+        String response = sendGetRequest("http://localhost:8080/api/creatures");
+
+        if (response == null) {
+            return;
+        }
+
+        printCreatureTable(response, "All Creatures");
     }
 
     private static void viewCreatureById(Scanner scanner) {
         System.out.print("Enter creature ID: ");
         String id = scanner.nextLine();
 
-        sendGetRequest("http://localhost:8080/api/creatures/" + id, "=== Creature Details ===");
+        String response = sendGetRequest("http://localhost:8080/api/creatures/" + id);
+
+        if (response == null) {
+            return;
+        }
+
+        printCreatureTable("[" + response + "]", "Creature Details");
     }
 
     private static void registerNewCreature(Scanner scanner) {
@@ -113,7 +125,13 @@ public class Main {
 
         String jsonBody = "{\"name\":\"" + name + "\"}";
 
-        sendPostRequest("http://localhost:8080/api/creatures", jsonBody, "=== Creature Registered ===");
+        String response = sendPostRequest("http://localhost:8080/api/creatures", jsonBody);
+
+        if (response == null) {
+            return;
+        }
+
+        printCreatureTable("[" + response + "]", "Creature Registered");
     }
 
     private static void renameCreature(Scanner scanner) {
@@ -133,11 +151,16 @@ public class Main {
 
         String jsonBody = "{\"name\":\"" + newName + "\"}";
 
-        sendPutRequest(
+        String response = sendPutRequest(
                 "http://localhost:8080/api/creatures/" + id + "/name",
-                jsonBody,
-                "=== Creature Renamed ==="
+                jsonBody
         );
+
+        if (response == null) {
+            return;
+        }
+
+        printCreatureTable("[" + response + "]", "Creature Renamed");
     }
 
     private static void removeCreature(Scanner scanner) {
@@ -152,34 +175,52 @@ public class Main {
             return;
         }
 
-        sendDeleteRequest("http://localhost:8080/api/creatures/" + id);
+        String response = sendDeleteRequest("http://localhost:8080/api/creatures/" + id);
+
+        if (response == null) {
+            return;
+        }
+
+        printCreatureTable("[" + response + "]", "Creature Removed");
     }
 
     private static void viewCreatureObservations(Scanner scanner) {
         System.out.print("Enter creature ID: ");
         String id = scanner.nextLine();
 
-        sendGetRequest(
-                "http://localhost:8080/api/creatures/" + id + "/observations",
-                "=== Creature Observations ==="
-        );
+        String response = sendGetRequest("http://localhost:8080/api/creatures/" + id + "/observations");
+
+        if (response == null) {
+            return;
+        }
+
+        printObservationTable(response);
     }
 
     private static void findCreaturesByFeedingTime(Scanner scanner) {
         System.out.print("Enter feeding time (HH:MM): ");
         String time = scanner.nextLine();
 
-        sendGetRequest(
-                "http://localhost:8080/api/feedings?time=" + time,
-                "=== Feedings At " + time + " ==="
-        );
+        String response = sendGetRequest("http://localhost:8080/api/feedings?time=" + time);
+
+        if (response == null) {
+            return;
+        }
+
+        printFeedingTable(response, time);
     }
 
     private static void viewAllSystemUsers() {
-        sendGetRequest("http://localhost:8080/api/admin/users", "=== System Users ===");
+        String response = sendGetRequest("http://localhost:8080/api/admin/users");
+
+        if (response == null) {
+            return;
+        }
+
+        printUserTable(response);
     }
 
-    private static void sendGetRequest(String urlText, String heading) {
+    private static String sendGetRequest(String urlText) {
 
         try {
 
@@ -193,31 +234,28 @@ public class Main {
             if (statusCode == 404) {
                 System.out.println("Not found.");
                 connection.disconnect();
-                return;
+                return null;
             }
 
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(connection.getInputStream())
-            );
-
-            String line;
-
-            System.out.println();
-            System.out.println(heading);
-
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+            if (statusCode == 400) {
+                System.out.println("Bad request. Check your input.");
+                connection.disconnect();
+                return null;
             }
 
-            reader.close();
+            String response = readResponse(connection);
+
             connection.disconnect();
+
+            return response;
 
         } catch (Exception e) {
             System.out.println("Error connecting to API.");
+            return null;
         }
     }
 
-    private static void sendPostRequest(String urlText, String jsonBody, String heading) {
+    private static String sendPostRequest(String urlText, String jsonBody) {
 
         try {
 
@@ -238,37 +276,28 @@ public class Main {
             if (statusCode == 400) {
                 System.out.println("Bad request. Check your input.");
                 connection.disconnect();
-                return;
+                return null;
             }
 
             if (statusCode == 409) {
                 System.out.println("Conflict. That creature name already exists.");
                 connection.disconnect();
-                return;
+                return null;
             }
 
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(connection.getInputStream())
-            );
+            String response = readResponse(connection);
 
-            String line;
-
-            System.out.println();
-            System.out.println(heading);
-
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-
-            reader.close();
             connection.disconnect();
+
+            return response;
 
         } catch (Exception e) {
             System.out.println("Error connecting to API.");
+            return null;
         }
     }
 
-    private static void sendPutRequest(String urlText, String jsonBody, String heading) {
+    private static String sendPutRequest(String urlText, String jsonBody) {
 
         try {
 
@@ -289,43 +318,34 @@ public class Main {
             if (statusCode == 400) {
                 System.out.println("Bad request. Check your input.");
                 connection.disconnect();
-                return;
+                return null;
             }
 
             if (statusCode == 404) {
                 System.out.println("Not found.");
                 connection.disconnect();
-                return;
+                return null;
             }
 
             if (statusCode == 409) {
                 System.out.println("Conflict. That creature name already exists.");
                 connection.disconnect();
-                return;
+                return null;
             }
 
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(connection.getInputStream())
-            );
+            String response = readResponse(connection);
 
-            String line;
-
-            System.out.println();
-            System.out.println(heading);
-
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-
-            reader.close();
             connection.disconnect();
+
+            return response;
 
         } catch (Exception e) {
             System.out.println("Error connecting to API.");
+            return null;
         }
     }
 
-    private static void sendDeleteRequest(String urlText) {
+    private static String sendDeleteRequest(String urlText) {
 
         try {
 
@@ -339,32 +359,201 @@ public class Main {
             if (statusCode == 404) {
                 System.out.println("Not found.");
                 connection.disconnect();
-                return;
+                return null;
             }
 
-            if (statusCode == 200) {
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(connection.getInputStream())
-                );
-
-                String line;
-
-                System.out.println();
-                System.out.println("=== Creature Removed ===");
-
-                while ((line = reader.readLine()) != null) {
-                    System.out.println(line);
-                }
-
-                reader.close();
-            } else {
+            if (statusCode != 200) {
                 System.out.println("Unexpected response: " + statusCode);
+                connection.disconnect();
+                return null;
             }
+
+            String response = readResponse(connection);
 
             connection.disconnect();
 
+            return response;
+
         } catch (Exception e) {
             System.out.println("Error connecting to API.");
+            return null;
         }
+    }
+
+    private static String readResponse(HttpURLConnection connection) throws Exception {
+
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(connection.getInputStream())
+        );
+
+        StringBuilder response = new StringBuilder();
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            response.append(line);
+        }
+
+        reader.close();
+
+        return response.toString();
+    }
+
+    private static void printCreatureTable(String json, String title) {
+        System.out.println();
+        System.out.println("=== " + title + " ===");
+        System.out.printf("%-6s %-24s %-24s %-12s%n", "ID", "Name", "Habitat", "Status");
+        System.out.println("----------------------------------------------------------------------");
+
+        String[] objects = splitJsonObjects(json);
+
+        if (objects.length == 0) {
+            System.out.println("No creatures found.");
+            return;
+        }
+
+        for (String object : objects) {
+            String id = getValue(object, "id");
+            String name = getValue(object, "name");
+            String habitatName = getValue(object, "habitatName");
+            String status = getValue(object, "status");
+
+            if (habitatName == null || habitatName.equals("null")) {
+                habitatName = "None";
+            }
+
+            if (status == null || status.equals("null") || status.isBlank()) {
+                status = "ACTIVE";
+            }
+
+            System.out.printf("%-6s %-24s %-24s %-12s%n", id, name, habitatName, status);
+        }
+    }
+
+    private static void printObservationTable(String json) {
+        System.out.println();
+        System.out.println("=== Creature Observations ===");
+        System.out.printf("%-6s %-12s %-24s %-32s %-40s%n", "ID", "Creature ID", "Author", "Created At", "Note");
+        System.out.println("----------------------------------------------------------------------------------------------------------------");
+
+        String[] objects = splitJsonObjects(json);
+
+        if (objects.length == 0) {
+            System.out.println("No observations found.");
+            return;
+        }
+
+        for (String object : objects) {
+            String id = getValue(object, "id");
+            String creatureId = getValue(object, "creatureId");
+            String authorName = getValue(object, "authorName");
+            String createdAt = getValue(object, "createdAt");
+            String note = getValue(object, "note");
+
+            System.out.printf("%-6s %-12s %-24s %-32s %-40s%n", id, creatureId, authorName, createdAt, note);
+        }
+    }
+
+    private static void printFeedingTable(String json, String time) {
+        System.out.println();
+        System.out.println("=== Feedings At " + time + " ===");
+        System.out.printf("%-6s %-12s %-24s %-12s %-24s%n", "ID", "Time", "Food", "Creature ID", "Creature Name");
+        System.out.println("--------------------------------------------------------------------------------------");
+
+        String[] objects = splitJsonObjects(json);
+
+        if (objects.length == 0) {
+            System.out.println("None need attending at this time.");
+            return;
+        }
+
+        for (String object : objects) {
+            String id = getValue(object, "id");
+            String feedingTime = getValue(object, "feedingTime");
+            String foodType = getValue(object, "foodType");
+            String creatureId = getValue(object, "creatureId");
+            String creatureName = getValue(object, "creatureName");
+
+            System.out.printf("%-6s %-12s %-24s %-12s %-24s%n", id, feedingTime, foodType, creatureId, creatureName);
+        }
+    }
+
+    private static void printUserTable(String json) {
+        System.out.println();
+        System.out.println("=== System Users ===");
+        System.out.printf("%-6s %-24s %-24s%n", "ID", "Username", "Role");
+        System.out.println("----------------------------------------------------------");
+
+        String[] objects = splitJsonObjects(json);
+
+        if (objects.length == 0) {
+            System.out.println("No system users found.");
+            return;
+        }
+
+        for (String object : objects) {
+            String id = getValue(object, "id");
+            String username = getValue(object, "username");
+            String roleName = getValue(object, "roleName");
+
+            System.out.printf("%-6s %-24s %-24s%n", id, username, roleName);
+        }
+    }
+
+    private static String[] splitJsonObjects(String json) {
+        if (json == null || json.equals("[]") || json.isBlank()) {
+            return new String[0];
+        }
+
+        String cleaned = json.trim();
+
+        if (cleaned.startsWith("[")) {
+            cleaned = cleaned.substring(1);
+        }
+
+        if (cleaned.endsWith("]")) {
+            cleaned = cleaned.substring(0, cleaned.length() - 1);
+        }
+
+        if (cleaned.isBlank()) {
+            return new String[0];
+        }
+
+        return cleaned.split("\\},\\{");
+    }
+
+    private static String getValue(String object, String key) {
+        String cleaned = object.replace("{", "").replace("}", "");
+        String search = "\"" + key + "\":";
+
+        int start = cleaned.indexOf(search);
+
+        if (start == -1) {
+            return "";
+        }
+
+        start = start + search.length();
+
+        if (start >= cleaned.length()) {
+            return "";
+        }
+
+        if (cleaned.charAt(start) == '"') {
+            start++;
+            int end = cleaned.indexOf("\"", start);
+
+            if (end == -1) {
+                return "";
+            }
+
+            return cleaned.substring(start, end);
+        }
+
+        int end = cleaned.indexOf(",", start);
+
+        if (end == -1) {
+            end = cleaned.length();
+        }
+
+        return cleaned.substring(start, end).trim();
     }
 }
