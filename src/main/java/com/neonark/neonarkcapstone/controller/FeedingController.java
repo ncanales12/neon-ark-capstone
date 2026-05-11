@@ -3,9 +3,11 @@ package com.neonark.neonarkcapstone.controller;
 import com.neonark.neonarkcapstone.dto.FeedingScheduleResponse;
 import com.neonark.neonarkcapstone.entity.FeedingSchedule;
 import com.neonark.neonarkcapstone.repository.FeedingScheduleRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @RestController
@@ -19,13 +21,22 @@ public class FeedingController {
     }
 
     @GetMapping
-    public List<FeedingScheduleResponse> getFeedingsByTime(@RequestParam String time) {
-        LocalTime feedingTime = LocalTime.parse(time);
+    public ResponseEntity<List<FeedingScheduleResponse>> getFeedingsByTime(@RequestParam String time) {
 
-        return feedingScheduleRepository.findByFeedingTime(feedingTime)
+        LocalTime feedingTime;
+
+        try {
+            feedingTime = LocalTime.parse(time);
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<FeedingScheduleResponse> responses = feedingScheduleRepository.findByFeedingTime(feedingTime)
                 .stream()
                 .map(this::toResponse)
                 .toList();
+
+        return ResponseEntity.ok(responses);
     }
 
     private FeedingScheduleResponse toResponse(FeedingSchedule feedingSchedule) {
