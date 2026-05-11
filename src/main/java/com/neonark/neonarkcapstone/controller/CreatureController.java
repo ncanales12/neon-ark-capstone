@@ -2,6 +2,7 @@ package com.neonark.neonarkcapstone.controller;
 
 import com.neonark.neonarkcapstone.dto.CreatureResponse;
 import com.neonark.neonarkcapstone.dto.ObservationResponse;
+import com.neonark.neonarkcapstone.dto.RenameCreatureResponse;
 import com.neonark.neonarkcapstone.entity.Creature;
 import com.neonark.neonarkcapstone.entity.FeedingSchedule;
 import com.neonark.neonarkcapstone.entity.Observation;
@@ -123,8 +124,8 @@ public class CreatureController {
     }
 
     @PutMapping("/{id}/name")
-    public ResponseEntity<Creature> renameCreature(@PathVariable Long id,
-                                                   @RequestBody Creature updatedCreature) {
+    public ResponseEntity<RenameCreatureResponse> renameCreature(@PathVariable Long id,
+                                                                 @RequestBody Creature updatedCreature) {
 
         Creature existing = creatureRepository.findById(id).orElse(null);
 
@@ -140,9 +141,13 @@ public class CreatureController {
             return ResponseEntity.status(409).build();
         }
 
+        String oldName = existing.getName();
+
         existing.setName(updatedCreature.getName());
 
-        return ResponseEntity.ok(creatureRepository.save(existing));
+        Creature saved = creatureRepository.save(existing);
+
+        return ResponseEntity.ok(toRenameResponse(saved, oldName));
     }
 
     @DeleteMapping("/{id}")
@@ -177,6 +182,28 @@ public class CreatureController {
 
         return new CreatureResponse(
                 creature.getId(),
+                creature.getName(),
+                habitatName,
+                status
+        );
+    }
+
+    private RenameCreatureResponse toRenameResponse(Creature creature, String oldName) {
+        String habitatName = null;
+
+        if (creature.getHabitat() != null) {
+            habitatName = creature.getHabitat().getName();
+        }
+
+        String status = creature.getStatus();
+
+        if (status == null || status.isBlank()) {
+            status = "ACTIVE";
+        }
+
+        return new RenameCreatureResponse(
+                creature.getId(),
+                oldName,
                 creature.getName(),
                 habitatName,
                 status
