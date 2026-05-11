@@ -10,13 +10,18 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
+    private String fullName;
+    private String email;
+    private String phone;
     private String roleName;
 
-    public User() {}
+    public User() {
+    }
 
-    public User(String username, String roleName) {
-        this.username = username;
+    public User(String fullName, String email, String phone, String roleName) {
+        this.fullName = fullName;
+        this.email = email;
+        this.phone = phone;
         this.roleName = roleName;
     }
 
@@ -24,16 +29,32 @@ public class User {
         return id;
     }
 
-    public String getUsername() {
-        return username;
+    public String getFullName() {
+        return fullName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPhone() {
+        return phone;
     }
 
     public String getRoleName() {
         return roleName;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public void setRoleName(String roleName) {

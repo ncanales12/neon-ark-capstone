@@ -417,7 +417,7 @@ public class Main {
             String habitatName = getValue(object, "habitatName");
             String status = getValue(object, "status");
 
-            if (habitatName == null || habitatName.equals("null")) {
+            if (habitatName == null || habitatName.equals("null") || habitatName.isBlank()) {
                 habitatName = "None";
             }
 
@@ -480,8 +480,8 @@ public class Main {
     private static void printUserTable(String json) {
         System.out.println();
         System.out.println("=== System Users ===");
-        System.out.printf("%-6s %-24s %-24s%n", "ID", "Username", "Role");
-        System.out.println("----------------------------------------------------------");
+        System.out.printf("%-6s %-24s %-28s %-18s %-18s%n", "ID", "Full Name", "Email", "Phone", "Role");
+        System.out.println("------------------------------------------------------------------------------------------------");
 
         String[] objects = splitJsonObjects(json);
 
@@ -492,10 +492,12 @@ public class Main {
 
         for (String object : objects) {
             String id = getValue(object, "id");
-            String username = getValue(object, "username");
+            String fullName = getValue(object, "fullName");
+            String email = getValue(object, "email");
+            String phone = getValue(object, "phone");
             String roleName = getValue(object, "roleName");
 
-            System.out.printf("%-6s %-24s %-24s%n", id, username, roleName);
+            System.out.printf("%-6s %-24s %-28s %-18s %-18s%n", id, fullName, email, phone, roleName);
         }
     }
 
