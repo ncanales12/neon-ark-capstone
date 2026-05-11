@@ -1,480 +1,323 @@
-\# Neon Ark Capstone Project
-
-
-
-Neon Ark is a creature intake tracking system built using Java, Spring Boot, PostgreSQL, Docker, and Gradle. The project allows users to manage creatures, habitats, feeding schedules, observations, and admin system data through both a REST API and a command line interface (CLI).
-
-
-
-This project was created for the COSC 4301 Modern Programming capstone course.
-
-
-
-\---
-
-
-
-\# Features
-
-
-
-\## Creature Management
-
-\- View all creatures
-
-\- View creature details by ID
-
-\- Register new creatures
-
-\- Rename creatures
-
-\- Remove creatures
-
-
-
-\## Observation System
-
-\- View creature observations and notes
-
-\- Track observation author and timestamps
-
-
-
-\## Feeding Schedule System
-
-\- Find creatures by feeding time
-
-\- View feeding schedule information
-
-
-
-\## Admin Features
-
-\- View system users
-
-
-
-\## Technical Features
-
-\- REST API built with Spring Boot
-
-\- PostgreSQL database integration
-
-\- Docker container setup
-
-\- Java CLI application
-
-\- DTO response objects
-
-\- Validation and HTTP status codes
-
-\- CRUD operations
-
-
-
-\---
-
-
-
-\# Technologies Used
-
-
-
-\- Java
-
-\- Spring Boot
-
-\- PostgreSQL
-
-\- Docker
-
-\- Gradle
-
-\- IntelliJ IDEA
-
-
-
-\---
-
-
-
-\# Project Structure
-
-
+# Neon Ark Capstone
+
+A Java Spring Boot REST API and CLI application for managing creatures, feeding schedules, observations, and system users inside the Neon Ark facility.
+
+This project was built for the COSC 4301 Modern Programming Capstone assignment.
+
+---
+
+# Features
+
+## Creature Management
+- List all creatures
+- View creature by ID
+- Register new creatures
+- Rename creatures
+- Soft delete creatures using REMOVED status
+- Track ACTIVE and REMOVED creature states
+
+## Observations
+- View creature observations and notes
+- Add timestamped observations tied to creatures
+
+## Feeding Schedules
+- Search feedings by time
+- Handle empty feeding schedules
+- Validate invalid feeding inputs
+
+## Admin System Users
+- View system users
+- Store:
+    - Full name
+    - Email
+    - Phone number
+    - Role
+
+## CLI Features
+- Professional table formatting
+- Input validation
+- Confirmation prompts
+- Error handling
+- Menu-driven interface
+
+---
+
+# Technologies Used
+
+## Backend
+- Java 17
+- Spring Boot
+- Spring Data JPA
+- Hibernate
+
+## Database
+- PostgreSQL 16
+- Docker
+
+## Tools
+- IntelliJ IDEA
+- Gradle
+- PowerShell
+- GitHub
+
+---
+
+# Project Structure
 
 ```text
-
 src/main/java/com/neonark/neonarkcapstone
-
 │
-
-├── controller
-
-├── entity
-
-├── repository
-
-├── dto
-
 ├── cli
-
-└── config
-
+├── controller
+├── dto
+├── entity
+├── repository
 ```
 
+---
 
+# Database Setup
 
-\---
+## Start PostgreSQL Container
 
-
-
-\# Database Setup
-
-
-
-The project uses PostgreSQL running inside Docker.
-
-
-
-Start the database container:
-
-
-
-```bash
-
-docker start neon\_ark\_postgres
-
+```powershell
+docker run --name neon_ark_postgres `
+  -e POSTGRES_PASSWORD=postgres `
+  -e POSTGRES_DB=neonark `
+  -p 5439:5432 `
+  -d postgres:16
 ```
 
+## Verify Container
 
-
-Verify the container is running:
-
-
-
-```bash
-
+```powershell
 docker ps
-
 ```
 
+---
 
+# Application Configuration
 
-The PostgreSQL database runs on port:
+## application.properties
 
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5439/neonark
+spring.datasource.username=postgres
+spring.datasource.password=postgres
 
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+```
+
+---
+
+# Running the Application
+
+## Start Spring Boot
+
+Run:
 
 ```text
-
-5439
-
+NeonArkCapstoneApplication.java
 ```
 
-
-
-\---
-
-
-
-\# Running the Spring Boot API
-
-
-
-Run the application from IntelliJ:
-
-
+Expected startup:
 
 ```text
-
-NeonArkCapstoneApplication
-
+Tomcat started on port 8080
+Started NeonArkCapstoneApplication
 ```
 
+---
 
+# Running the CLI
 
-The API runs on:
-
-
+Run:
 
 ```text
-
-http://localhost:8080
-
+Main.java
 ```
 
+Main menu:
 
+```text
+1. List all creatures
+2. View creature by ID
+3. Register new creature
+4. Rename creature
+5. Remove creature
+6. View creature observations/notes
+7. Find creatures by feeding time
 
-\---
+--- Admin Only ---
+8. View all system users
 
+0. Exit
+```
 
+---
 
-\# Example API Endpoints
+# API Endpoints
 
+## Creatures
 
-
-\## Get all creatures
-
-
+### Get All Creatures
 
 ```http
-
 GET /api/creatures
-
 ```
 
-
-
-\## Get creature by ID
-
-
+### Get Creature By ID
 
 ```http
-
-GET /api/creatures/3
-
+GET /api/creatures/{id}
 ```
 
-
-
-\## Create creature
-
-
+### Register Creature
 
 ```http
-
 POST /api/creatures
-
 ```
 
-
-
-\## Rename creature
-
-
+### Rename Creature
 
 ```http
-
 PUT /api/creatures/{id}/name
-
 ```
 
-
-
-\## Delete creature
-
-
+### Soft Delete Creature
 
 ```http
-
 DELETE /api/creatures/{id}
-
 ```
 
+---
 
+## Observations
 
-\## Get creature observations
-
-
+### Get Creature Observations
 
 ```http
-
-GET /api/creatures/3/observations
-
+GET /api/creatures/{id}/observations
 ```
 
-
-
-\## Find feedings by time
-
-
+### Add Observation
 
 ```http
+POST /api/creatures/{id}/observations
+```
 
+---
+
+## Feedings
+
+### Search Feedings By Time
+
+```http
 GET /api/feedings?time=08:00
-
 ```
 
+---
 
+## Admin Users
 
-\## View admin users
-
-
+### Get All Users
 
 ```http
-
 GET /api/admin/users
-
 ```
 
+### Create User
 
+```http
+POST /api/admin/users
+```
 
-\---
+---
 
+# PowerShell API Testing
 
+## Get Creatures
 
-\# Running the CLI
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/api/creatures" -Method GET
+```
 
+## Get Feedings
 
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/api/feedings?time=08:00" -Method GET
+```
 
-Run the CLI application:
+## Get Admin Users
 
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/api/admin/users" -Method GET
+```
 
+---
+
+# Validation and Error Handling
+
+The application handles:
+
+- Invalid creature IDs
+- Duplicate creature names
+- Invalid feeding times
+- Empty requests
+- Cancelled rename/delete operations
+- Soft delete behavior
+
+Example responses:
 
 ```text
-
-com.neonark.neonarkcapstone.cli.Main
-
+Not found.
 ```
-
-
-
-\---
-
-
-
-\# CLI Features
-
-
-
-\- List creatures
-
-\- View creature by ID
-
-\- Register creature
-
-\- Rename creature
-
-\- Remove creature
-
-\- View observations
-
-\- Find feedings by time
-
-\- View system users
-
-\- Exit confirmation prompts
-
-
-
-\---
-
-
-
-\# Validation and Error Handling
-
-
-
-The API includes validation and proper HTTP status codes.
-
-
-
-Examples:
-
-
-
-\- `400 Bad Request`
-
-\- `404 Not Found`
-
-\- `409 Conflict`
-
-
-
-\---
-
-
-
-\# Example Test Cases
-
-
-
-\## Invalid Creature ID
-
-
 
 ```text
-
-GET /api/creatures/999
-
+Conflict. That creature name already exists.
 ```
-
-
-
-Returns:
-
-
 
 ```text
-
-404 Not Found
-
+Bad request. Check your input.
 ```
 
+---
 
+# Soft Delete Behavior
 
-\## Blank Creature Name
+Creatures are not permanently removed from the database.
 
-
-
-```json
-
-{
-
-&#x20; "name": ""
-
-}
-
-```
-
-
-
-Returns:
-
-
+Deleting a creature changes the status to:
 
 ```text
-
-400 Bad Request
-
+REMOVED
 ```
 
+The creature can still be viewed later for tracking and audit purposes.
 
+---
 
-\## Duplicate Creature Name
+# Screenshots
 
+The project includes screenshots showing:
 
+- CLI functionality
+- API testing
+- PostgreSQL Docker container
+- Spring Boot startup
+- IntelliJ project structure
+- Validation handling
+- Admin users
+- Feeding schedules
+- Soft delete behavior
 
-```json
+---
 
-{
-
-&#x20; "name": "Dragon"
-
-}
-
-```
-
-
-
-Returns:
-
-
-
-```text
-
-409 Conflict
-
-```
-
-
-
-\---
-
-
-
-\# Author
-
-
+# Author
 
 Nicolas Canales
 
+COSC 4301 - Modern Programming Capstone
+
+Spring 2026
