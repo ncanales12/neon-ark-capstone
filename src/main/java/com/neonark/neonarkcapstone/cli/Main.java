@@ -160,7 +160,7 @@ public class Main {
             return;
         }
 
-        printCreatureTable("[" + response + "]", "Creature Renamed");
+        printRenameTable(response);
     }
 
     private static void removeCreature(Scanner scanner) {
@@ -427,6 +427,29 @@ public class Main {
 
             System.out.printf("%-6s %-24s %-24s %-12s%n", id, name, habitatName, status);
         }
+    }
+
+    private static void printRenameTable(String json) {
+        System.out.println();
+        System.out.println("=== Creature Renamed ===");
+        System.out.printf("%-6s %-24s %-24s %-24s %-12s%n", "ID", "Old Name", "New Name", "Habitat", "Status");
+        System.out.println("----------------------------------------------------------------------------------------------");
+
+        String id = getValue(json, "id");
+        String oldName = getValue(json, "oldName");
+        String newName = getValue(json, "newName");
+        String habitatName = getValue(json, "habitatName");
+        String status = getValue(json, "status");
+
+        if (habitatName == null || habitatName.equals("null") || habitatName.isBlank()) {
+            habitatName = "None";
+        }
+
+        if (status == null || status.equals("null") || status.isBlank()) {
+            status = "ACTIVE";
+        }
+
+        System.out.printf("%-6s %-24s %-24s %-24s %-12s%n", id, oldName, newName, habitatName, status);
     }
 
     private static void printObservationTable(String json) {
