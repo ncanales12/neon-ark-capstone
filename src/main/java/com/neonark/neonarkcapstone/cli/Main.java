@@ -76,7 +76,10 @@ public class Main {
 
     private static void printMenu() {
         System.out.println();
-        System.out.println("=== Neon Ark Intake Tracker ===");
+        System.out.println("=====================================");
+        System.out.println("       NEON ARK CLI SYSTEM");
+        System.out.println("=====================================");
+        System.out.println();
         System.out.println("1. List all creatures");
         System.out.println("2. View creature by ID");
         System.out.println("3. Register new creature");
@@ -85,11 +88,12 @@ public class Main {
         System.out.println("6. View creature observations/notes");
         System.out.println("7. Find creatures by feeding time");
         System.out.println();
-        System.out.println("Admin Only");
+        System.out.println("--- Admin Only ---");
         System.out.println("8. View all system users");
         System.out.println();
         System.out.println("0. Exit");
-        System.out.print("Choose an option: ");
+        System.out.println("-------------------------------------");
+        System.out.print("Select an option: ");
     }
 
     private static void listAllCreatures() {
@@ -338,8 +342,21 @@ public class Main {
                 return;
             }
 
-            if (statusCode == 204) {
-                System.out.println("Creature removed.");
+            if (statusCode == 200) {
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(connection.getInputStream())
+                );
+
+                String line;
+
+                System.out.println();
+                System.out.println("=== Creature Removed ===");
+
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
+
+                reader.close();
             } else {
                 System.out.println("Unexpected response: " + statusCode);
             }
